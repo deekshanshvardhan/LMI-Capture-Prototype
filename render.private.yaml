@@ -1,0 +1,25 @@
+# Use this Blueprint file if your GitHub repo MUST stay private.
+# Render does not allow plan: free for private repos — this uses the paid Starter instance.
+#
+# Dashboard → New → Blueprint → select THIS file as the blueprint
+# (or rename to render.yaml temporarily), then connect the repo.
+#
+# Cost: see https://render.com/pricing (Starter web service, ~low monthly USD).
+
+services:
+  - type: web
+    name: lmi-capture-api
+    runtime: python
+    plan: starter
+    region: singapore
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false

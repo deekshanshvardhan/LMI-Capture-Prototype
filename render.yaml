@@ -1,0 +1,26 @@
+# Render Blueprint — deploy the FastAPI backend (free tier).
+# https://dashboard.render.com → New → Blueprint → connect this repo.
+#
+# After first deploy, open the service → Environment → add:
+#   SUPABASE_URL
+#   SUPABASE_SERVICE_KEY
+# (from Supabase Dashboard → Project Settings → API)
+
+services:
+  - type: web
+    name: lmi-capture-api
+    runtime: python
+    # Free tier only for public repos. Private repo → use plan: starter or set in dashboard.
+    plan: free
+    region: singapore
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false

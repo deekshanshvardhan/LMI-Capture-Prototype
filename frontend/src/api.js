@@ -1,4 +1,5 @@
-const BASE = '/api';
+// Local dev: Vite proxies /api → backend. Production: set VITE_API_BASE_URL on the host (e.g. https://your-api.onrender.com/api).
+const BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {
