@@ -29,6 +29,7 @@ class LMICaptureRequest(BaseModel):
     shelf_life_uom: Optional[str] = None
     mrp: Optional[float] = None
     month_year_mode: bool = False
+    capture_mode: str = "full"
     operator_id: str = "OP-001"
     time_taken_ms: Optional[int] = None
 
@@ -61,6 +62,7 @@ def capture_lmi(req: LMICaptureRequest):
         "shelf_life_days": shelf_life_days,
         "mrp": req.mrp,
         "month_year_mode": req.month_year_mode,
+        "capture_mode": req.capture_mode,
         "operator_id": req.operator_id,
         "time_taken_ms": req.time_taken_ms,
     }
@@ -93,15 +95,33 @@ def capture_stats():
     count_result = supabase.table(TABLE_NAME).select("id", count="exact").execute()
     total = count_result.count if count_result.count else 0
 
-    time_result = supabase.table(TABLE_NAME).select("time_taken_ms").not_.is_("time_taken_ms", "null").execute()
+    time_result = (
+        supabase.table(TABLE_NAME)
+        .select("time_taken_ms, capture_mode")
+        .not_.is_("time_taken_ms", "null")
+        .execute()
+    )
 
     avg_time = None
+    mode_stats = {}
     if time_result.data:
         times = [r["time_taken_ms"] for r in time_result.data if r.get("time_taken_ms")]
         if times:
             avg_time = round(sum(times) / len(times))
 
+        for mode in ("full", "mfg_only"):
+            mode_times = [
+                r["time_taken_ms"]
+                for r in time_result.data
+                if r.get("time_taken_ms") and r.get("capture_mode") == mode
+            ]
+            mode_stats[mode] = {
+                "count": len(mode_times),
+                "avg_time_ms": round(sum(mode_times) / len(mode_times)) if mode_times else None,
+            }
+
     return {
         "total_captures": total,
         "avg_time_ms": avg_time,
+        "by_mode": mode_stats,
     }

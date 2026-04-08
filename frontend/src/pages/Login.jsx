@@ -1,7 +1,9 @@
 import { useState } from 'react';
 
-const VALID_USER = 'Flipkart';
-const VALID_PASS = 'Flipkart123';
+const CREDENTIALS = [
+  { user: 'Flipkart', pass: 'Flipkart123', mode: 'full' },
+  { user: 'Admin', pass: 'Admin', mode: 'mfg_only' },
+];
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
@@ -11,8 +13,12 @@ export default function Login({ onLogin }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (username === VALID_USER && password === VALID_PASS) {
+    const match = CREDENTIALS.find(
+      (c) => c.user === username && c.pass === password,
+    );
+    if (match) {
       localStorage.setItem('lmi_auth', 'true');
+      localStorage.setItem('lmi_capture_mode', match.mode);
       onLogin();
     } else {
       setError('Invalid username or password');
