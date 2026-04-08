@@ -84,13 +84,13 @@ export default function LMICapture() {
         bin_id: binId.trim(),
         scan_value: scanValue.trim(),
         scan_type: scanType,
-        offer: isMfgOnly ? null : (offer || null),
+        offer: offer || null,
         mfg_date: mfgDate || null,
         expiry_date: isMfgOnly ? null : (expiryDate || null),
         shelf_life_value: isMfgOnly ? null : (shelfLifeValue ? parseInt(shelfLifeValue) : null),
         shelf_life_uom: isMfgOnly ? null : (shelfLifeValue ? UOM_MAP[shelfLifeUom] : null),
-        mrp: isMfgOnly ? null : (mrp ? parseFloat(mrp) : null),
-        month_year_mode: isMfgOnly ? false : monthYearMode,
+        mrp: mrp ? parseFloat(mrp) : null,
+        month_year_mode: monthYearMode,
         capture_mode: captureMode,
         time_taken_ms: timeTaken,
       });
@@ -255,27 +255,25 @@ export default function LMICapture() {
               {isMfgOnly ? 'Mfg-Only Mode' : 'Full Mode'}
             </div>
 
-            {/* offer (full mode only) */}
-            {!isMfgOnly && (
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">offer</label>
-                <div className="relative">
-                  <select value={offer} onChange={(e) => setOffer(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-sm text-sm bg-white
-                      focus:border-[#0065ff] focus:outline-none appearance-none">
-                    <option value="">Select offer</option>
-                    <option value="No Offer">No Offer</option>
-                    <option value="Buy 2 Get 1">Buy 2 Get 1</option>
-                    <option value="10% Off">10% Off</option>
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
+            {/* offer */}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">offer</label>
+              <div className="relative">
+                <select value={offer} onChange={(e) => setOffer(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-sm text-sm bg-white
+                    focus:border-[#0065ff] focus:outline-none appearance-none">
+                  <option value="">Select offer</option>
+                  <option value="No Offer">No Offer</option>
+                  <option value="Buy 2 Get 1">Buy 2 Get 1</option>
+                  <option value="10% Off">10% Off</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
                 </div>
               </div>
-            )}
+            </div>
 
             {/* mfg_date (always visible) */}
             <div>
@@ -292,74 +290,75 @@ export default function LMICapture() {
               />
             </div>
 
-            {/* mrp (full mode only) */}
-            {!isMfgOnly && (
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">mrp</label>
-                <input
-                  type="number" step="0.01" value={mrp}
-                  onChange={(e) => setMrp(e.target.value)}
-                  placeholder="Enter mrp"
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-sm text-sm bg-white
-                    focus:border-[#0065ff] focus:outline-none"
-                />
-              </div>
-            )}
+            {/* mrp */}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">mrp</label>
+              <input
+                type="number" step="0.01" value={mrp}
+                onChange={(e) => setMrp(e.target.value)}
+                placeholder="Enter mrp"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-sm text-sm bg-white
+                  focus:border-[#0065ff] focus:outline-none"
+              />
+            </div>
 
-            {/* expiry/shelf-life section (full mode only) */}
-            {!isMfgOnly && (
-              <div className="border-t border-gray-200 pt-4">
-                <label className="flex items-center gap-2.5 pb-3">
-                  <input type="checkbox" checked={monthYearMode}
-                    onChange={(e) => { setMonthYearMode(e.target.checked); setMfgDate(''); setExpiryDate(''); }}
-                    className="w-4 h-4 rounded border-gray-300 text-[#0065ff] focus:ring-[#0065ff]" />
-                  <span className="text-xs text-gray-600">Only Month/Year available</span>
-                </label>
+            {/* month/year toggle + expiry/shelf-life section */}
+            <div className="border-t border-gray-200 pt-4">
+              <label className="flex items-center gap-2.5 pb-3">
+                <input type="checkbox" checked={monthYearMode}
+                  onChange={(e) => { setMonthYearMode(e.target.checked); setMfgDate(''); setExpiryDate(''); }}
+                  className="w-4 h-4 rounded border-gray-300 text-[#0065ff] focus:ring-[#0065ff]" />
+                <span className="text-xs text-gray-600">Only Month/Year available</span>
+              </label>
 
-                <div className="mb-4">
-                  <label className="block text-xs text-gray-500 mb-1">expiry_date</label>
-                  <input
-                    type={monthYearMode ? 'month' : 'date'}
-                    value={expiryDate}
-                    disabled={lockedField === 'expiry'}
-                    onChange={(e) => setExpiryDate(e.target.value)}
-                    placeholder="Select expiry_date"
-                    className={`w-full px-3 py-2.5 border border-gray-300 rounded-sm text-sm bg-white
-                      focus:border-[#0065ff] focus:outline-none disabled:bg-gray-50 disabled:opacity-50
-                      ${!expiryDate ? 'text-gray-400' : 'text-gray-900'}`}
-                  />
-                </div>
-
-                <div className="text-center text-xs text-gray-400 py-1">— OR —</div>
-
-                <div className="mt-3">
-                  <label className="block text-xs text-gray-500 mb-1">shelf_life</label>
-                  <div className="flex gap-2 items-center">
+              {/* expiry_date + shelf_life (full mode only) */}
+              {!isMfgOnly && (
+                <>
+                  <div className="mb-4">
+                    <label className="block text-xs text-gray-500 mb-1">expiry_date</label>
                     <input
-                      type="number" min={1}
-                      value={shelfLifeValue}
-                      disabled={lockedField === 'shelf_life'}
-                      onChange={(e) => setShelfLifeValue(e.target.value)}
-                      placeholder="e.g. 12"
-                      className="flex-1 px-3 py-2.5 border border-gray-300 rounded-sm text-sm bg-white
-                        focus:border-[#0065ff] focus:outline-none disabled:bg-gray-50 disabled:opacity-50"
+                      type={monthYearMode ? 'month' : 'date'}
+                      value={expiryDate}
+                      disabled={lockedField === 'expiry'}
+                      onChange={(e) => setExpiryDate(e.target.value)}
+                      placeholder="Select expiry_date"
+                      className={`w-full px-3 py-2.5 border border-gray-300 rounded-sm text-sm bg-white
+                        focus:border-[#0065ff] focus:outline-none disabled:bg-gray-50 disabled:opacity-50
+                        ${!expiryDate ? 'text-gray-400' : 'text-gray-900'}`}
                     />
-                    <div className="flex border border-gray-300 rounded-sm overflow-hidden">
-                      {UOM_OPTIONS.map((u) => (
-                        <button key={u} type="button"
-                          onClick={() => setShelfLifeUom(u)}
-                          disabled={lockedField === 'shelf_life'}
-                          className={`px-3 py-2.5 text-xs font-medium transition-colors border-r last:border-r-0 border-gray-300
-                            disabled:opacity-50
-                            ${shelfLifeUom === u ? 'text-[#0065ff] bg-blue-50' : 'text-gray-500 bg-white'}`}>
-                          {u}
-                        </button>
-                      ))}
+                  </div>
+
+                  <div className="text-center text-xs text-gray-400 py-1">— OR —</div>
+
+                  <div className="mt-3">
+                    <label className="block text-xs text-gray-500 mb-1">shelf_life</label>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="number" min={1}
+                        value={shelfLifeValue}
+                        disabled={lockedField === 'shelf_life'}
+                        onChange={(e) => setShelfLifeValue(e.target.value)}
+                        placeholder="e.g. 12"
+                        className="flex-1 px-3 py-2.5 border border-gray-300 rounded-sm text-sm bg-white
+                          focus:border-[#0065ff] focus:outline-none disabled:bg-gray-50 disabled:opacity-50"
+                      />
+                      <div className="flex border border-gray-300 rounded-sm overflow-hidden">
+                        {UOM_OPTIONS.map((u) => (
+                          <button key={u} type="button"
+                            onClick={() => setShelfLifeUom(u)}
+                            disabled={lockedField === 'shelf_life'}
+                            className={`px-3 py-2.5 text-xs font-medium transition-colors border-r last:border-r-0 border-gray-300
+                              disabled:opacity-50
+                              ${shelfLifeUom === u ? 'text-[#0065ff] bg-blue-50' : 'text-gray-500 bg-white'}`}>
+                            {u}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
+                </>
+              )}
+            </div>
 
             {error && <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-sm">{error}</div>}
           </div>
